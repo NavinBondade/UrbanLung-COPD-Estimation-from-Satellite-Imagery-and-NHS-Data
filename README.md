@@ -20,7 +20,11 @@ UrbanLung addresses this through a multimodal stacking ensemble combining scalar
 
 The dataset comprises 791 practice-year observations across 159 West Yorkshire NHS practices spanning four NHS commissioning areas: Bradford, Kirklees, Leeds, and Wakefield, covering five financial years 2019-20 to 2023-24. The primary outcome is COPD prevalence from the Quality and Outcomes Framework (QOF), published annually by NHS Digital as the ratio of registered patients on the practice COPD register to total list size. Prevalence ranged from 1.02% to 5.35% across the dataset, with a mean of 2.23% and standard deviation of 0.73%.
 
+<div align="center">
+
 **Table 1: Data sources, variables, resolution and observation period.**
+
+</div>
 
 | Source | Variable | Resolution | Period |
 |--------|----------|------------|--------|
@@ -36,17 +40,29 @@ All satellite and environmental features were extracted from Google Earth Engine
 
 One-year temporal lags were computed for NO2, NDVI, EVI, PM2.5, and population density, capturing cumulative exposure history relevant to COPD pathogenesis. A NO2 change feature and a binary COVID-19 indicator were additionally included. The 2019-20 year was excluded from lag-dependent models as no prior year was available, leaving 636 training and 155 test observations under the temporal split protocol.
 
-**Figure 1: Geographic distribution of COPD burden across 159 West Yorkshire GP practices (2023-24).**
+<div align="center">
 
-![Figure 1: Geographic map](figures/s10_geographic_map.png)
+![Figure 1](figures/s10_geographic_map.png)
 
-**Figure 2: COPD prevalence distribution and year-on-year trend by NHS area (2019-2024).**
+*Figure 1: Geographic distribution of COPD burden across 159 West Yorkshire GP practices (2023-24).*
 
-![Figure 2: COPD distribution](figures/s2_copd_distribution.png)
+</div>
 
-**Figure 3: Area-wise comparison of COPD, NO2, NDVI and elevation across four NHS commissioning areas.**
+<div align="center">
 
-![Figure 3: Area comparison](figures/s4_area_comparison.png)
+![Figure 2](figures/s2_copd_distribution.png)
+
+*Figure 2: COPD prevalence distribution and year-on-year trend by NHS area (2019-2024).*
+
+</div>
+
+<div align="center">
+
+![Figure 3](figures/s4_area_comparison.png)
+
+*Figure 3: Area-wise comparison of COPD, NO2, NDVI and elevation across four NHS commissioning areas.*
+
+</div>
 
 ---
 
@@ -58,45 +74,73 @@ Four model architectures were developed and evaluated for research purposes, eac
 
 Ridge regression with NDVI and NO2 as sole predictors replicates the design of published environmental health studies that use satellite-derived spectral indices to predict respiratory outcomes at aggregate geographic units. Its purpose is not to perform well but to establish whether the two most widely used satellite environmental variables, in isolation and without non-linear modelling, are sufficient for GP practice-level generalisation. Regularisation strength was selected via four-fold temporal cross-validation across twenty log-spaced values. The best alpha of 298 produced near-constant predictions with a predicted variance of 0.004%, confirming that two scalar features are insufficient and motivating the richer feature engineering of M2.
 
-**Figure 4: Ridge regression alpha search, predicted vs actual, and residual analysis.**
+<div align="center">
 
-![Figure 4: Ridge results](figures/model1_ridge_v2.png)
+![Figure 4](figures/model1_ridge_v2.png)
+
+*Figure 4: Ridge regression alpha search, predicted vs actual, and residual analysis.*
+
+</div>
 
 ### M2 — XGBoost (Tabular Ceiling)
 
 XGBoost was trained on fifteen tabular features spanning vegetation indices, air quality variables, land surface temperature, elevation, population density, image texture, temporal indicators, and one-year lags for key exposures. Its purpose is to establish the maximum predictive performance achievable from scalar environmental data alone, providing the tabular ceiling against which the marginal image contribution of M3 is measured. XGBoost was selected over linear models and neural tabular methods because it handles non-linear feature interactions natively, is robust to the small dataset size, and supports exact SHAP decomposition, which is used to attribute feature contributions to individual predictions and inform the clinical translation outputs.
 
-**Figure 5: XGBoost SHAP feature importance, beeswarm plot, predicted vs actual, and SHAP dependence for the top feature.**
+<div align="center">
 
-![Figure 5: XGBoost SHAP](figures/model2_xgboost_v2.png)
+![Figure 5](figures/model2_xgboost_v2.png)
+
+*Figure 5: XGBoost SHAP feature importance, beeswarm plot, predicted vs actual, and SHAP dependence for the top feature.*
+
+</div>
 
 ### M3 — SatResNet (Satellite Image CNN)
 
 A ResNet-50 backbone pre-trained on 250,000 Sentinel-2 scenes via Momentum Contrast self-supervised learning (SENTINEL2_RGB_MOCO, accessed via torchgeo) was fine-tuned for COPD regression. Domain-specific pre-training was chosen over ImageNet initialisation because the spectral and geometric properties of Sentinel-2 overhead imagery differ fundamentally from natural photographs, and satellite-domain pre-training has been shown to outperform ImageNet on downstream earth observation tasks (Stewart et al., 2021). Two-phase transfer learning was employed: Phase 1 trained a three-layer regression head with the backbone frozen to establish a stable starting point; Phase 2 unfroze the two final residual blocks for spatial feature adaptation while preserving low-level Sentinel-2 representations. For leave-one-out evaluation, each fold loaded a fresh backbone to prevent leakage from practices in the test fold contributing to backbone representations. GradCAM and GradCAM++ were applied post-training to identify which image regions most influenced predictions, providing a spatial interpretability layer that scalar models cannot offer.
 
-**Figure 6: GradCAM spatial attention maps for the five highest-COPD practices. Warm activation on road networks and building clusters.**
+<div align="center">
 
-![Figure 6: GradCAM high COPD](figures/model3_gradcam_high.png)
+![Figure 6](figures/model3_gradcam_high.png)
 
-**Figure 7: GradCAM spatial attention maps for the five lowest-COPD practices. Warm activation on green space and agricultural land.**
+*Figure 6: GradCAM spatial attention maps for the five highest-COPD practices. Warm activation on road networks and building clusters.*
 
-![Figure 7: GradCAM low COPD](figures/model3_gradcam_low.png)
+</div>
 
-**Figure 8: GradCAM++ maps for highest-COPD practices, providing more localised activation than standard GradCAM.**
+<div align="center">
 
-![Figure 8: GradCAM++](figures/model3_gradcampp_high.png)
+![Figure 7](figures/model3_gradcam_low.png)
 
-**Figure 9: Occlusion sensitivity analysis for highest-COPD practices, providing model-agnostic validation of GradCAM findings.**
+*Figure 7: GradCAM spatial attention maps for the five lowest-COPD practices. Warm activation on green space and agricultural land.*
 
-![Figure 9: Occlusion sensitivity](figures/model3_occlusion_high.png)
+</div>
+
+<div align="center">
+
+![Figure 8](figures/model3_gradcampp_high.png)
+
+*Figure 8: GradCAM++ maps for highest-COPD practices, providing more localised activation than standard GradCAM.*
+
+</div>
+
+<div align="center">
+
+![Figure 9](figures/model3_occlusion_high.png)
+
+*Figure 9: Occlusion sensitivity analysis for highest-COPD practices, providing model-agnostic validation of GradCAM findings.*
+
+</div>
 
 ### M4 — Stacking Ensemble (Deployed Model)
 
 The stacking ensemble combined out-of-fold predictions from M2 and M3 as inputs to a Ridge meta-learner. The out-of-fold design is critical: by training the meta-learner exclusively on predictions that the base models made without access to the target practice, no information about any practice enters the meta-learner's training set through that practice's own predictions. This prevents the target leakage that would arise from using in-sample fitted values. Simple averaging of base model predictions was rejected in favour of stacking because it assumes equal contribution from each modality, an assumption that is unlikely to hold when one model uses fifteen curated environmental features and the other uses raw image patches. The Ridge meta-learner was selected for its interpretability: the two fitted coefficients directly represent modality weights, providing a principled, data-driven answer to the question of how much satellite imagery contributes beyond tabular features. Meta-learner regularisation strength was selected by leave-one-out cross-validation over the aligned out-of-fold predictions.
 
-**Figure 10: Stacking ensemble results showing OOF predictions for both base models, modality weight pie chart, and LOOCV comparison across all models.**
+<div align="center">
 
-![Figure 10: Stacking results](figures/model4_stacking_results.png)
+![Figure 10](figures/model4_stacking_results.png)
+
+*Figure 10: Stacking ensemble results showing OOF predictions for both base models, modality weight pie chart, and LOOCV comparison across all models.*
+
+</div>
 
 ---
 
@@ -114,9 +158,13 @@ Each of the 159 practices was held out in turn. The model was trained on the rem
 
 LOOCV was applied differently across models depending on computational feasibility. For Ridge (M1) and XGBoost (M2), true LOOCV was used, comprising 159 separate model fits. For SatResNet (M3), five-fold practice-stratified cross-validation was used as a computationally feasible approximation, with each fold loading a fresh SENTINEL2_RGB_MOCO backbone to prevent leakage. For the stacking ensemble (M4), LOOCV required no additional training as the meta-learner was trained directly on the out-of-fold predictions already computed during M2 and M3 evaluation.
 
-**Figure 11: Persistence baseline motivation showing within-practice versus between-practice COPD variance and practice trajectories across five years.**
+<div align="center">
 
-![Figure 11: Persistence baseline](figures/s9_persistence_motivation.png)
+![Figure 11](figures/s9_persistence_motivation.png)
+
+*Figure 11: Persistence baseline motivation showing within-practice versus between-practice COPD variance and practice trajectories across five years.*
+
+</div>
 
 ---
 
@@ -124,7 +172,11 @@ LOOCV was applied differently across models depending on computational feasibili
 
 ### Model Performance
 
+<div align="center">
+
 **Table 2: Model performance under both evaluation protocols. LOOCV R2 is the primary metric.**
+
+</div>
 
 | Model | Temporal R2 | LOOCV R2 | MAE (%) | Notes |
 |-------|-------------|----------|---------|-------|
@@ -136,9 +188,13 @@ LOOCV was applied differently across models depending on computational feasibili
 
 The persistence baseline's temporal R2=0.966 reflects within-practice register stability rather than predictive skill and is reported as a reference ceiling only. The Ridge model's LOOCV R2=0.022 confirms that NDVI and NO2 scalars alone are insufficient for practice-level generalisation. XGBoost establishes the tabular ceiling at LOOCV R2=0.279. SatResNet achieves LOOCV R2=0.188, below the tabular ceiling, which is expected given that scalar summaries of exposure distil information that requires years of epidemiological study to identify, whereas the image model must learn relevant spatial features from 159 practices alone. The stacking ensemble's LOOCV R2=0.352 exceeds both base learners, confirming complementary signal across modalities.
 
-**Figure 12: Complete model comparison across temporal R2 and LOOCV R2, with improvement arrow from XGBoost to Stacking and full results table.**
+<div align="center">
 
-![Figure 12: Model comparison](figures/final_model_comparison_v2.png)
+![Figure 12](figures/final_model_comparison_v2.png)
+
+*Figure 12: Complete model comparison across temporal R2 and LOOCV R2, with improvement arrow from XGBoost to Stacking and full results table.*
+
+</div>
 
 ### Satellite Image Contribution
 
@@ -146,7 +202,11 @@ The meta-learner assigned 62.5% weight to XGBoost tabular predictions and 37.5% 
 
 ### SHAP Feature Importance
 
+<div align="center">
+
 **Table 3: SHAP feature importance on test set (XGBoost model). Combined pollution group: NO2 + NO2 lag + NO2 change + PM2.5 + PM2.5 lag = 0.146pp.**
+
+</div>
 
 | Rank | Feature | Mean SHAP | Interpretation |
 |------|---------|-----------|----------------|
@@ -163,7 +223,11 @@ Population density and elevation dominate prediction, reflecting structural geog
 
 ### Uncertainty Quantification
 
+<div align="center">
+
 **Table 4: Comparison of uncertainty quantification methods.**
+
+</div>
 
 | Method | CI Width | Empirical Coverage | Valid? |
 |--------|----------|--------------------|--------|
@@ -173,13 +237,21 @@ Population density and elevation dominate prediction, reflecting structural geog
 
 MC Dropout achieved only 39.4% empirical coverage, confirming that deep learning uncertainty estimates are poorly calibrated for this regression task at small sample size. LOO conformal prediction achieved 95.6% coverage with CI +/-1.041%, meeting the theoretical guarantee of at least 95% coverage for exchangeable data. Seven of 159 practices fall outside the conformal interval, consistent with the expected 5% non-coverage rate.
 
-**Figure 13: LOO conformal prediction intervals across all 159 practices, coverage by area, and CI width distribution.**
+<div align="center">
 
-![Figure 13: LOO conformal](figures/track6c_loo_conformal.png)
+![Figure 13](figures/track6c_loo_conformal.png)
+
+*Figure 13: LOO conformal prediction intervals across all 159 practices, coverage by area, and CI width distribution.*
+
+</div>
 
 ### Area-Level Findings
 
+<div align="center">
+
 **Table 5: Area-level summary statistics (mean across 2019-2024). Burden score is a composite of NO2 rank (50%), inverse NDVI rank (30%), and COPD rank (20%).**
+
+</div>
 
 | NHS Area | Practices | COPD (%) | NO2 (umol/m2) | NDVI | Elevation (m) | Burden Score |
 |----------|-----------|----------|----------------|------|---------------|--------------|
@@ -190,17 +262,29 @@ MC Dropout achieved only 39.4% empirical coverage, confirming that deep learning
 
 Leeds exhibits the highest composite environmental burden score of 0.613, driven by the highest NO2 concentrations in the region at 106.4 umol/m2 combined with the lowest mean NDVI of 0.539. The Wakefield anomaly is confirmed in residual analysis: Wakefield practices show the largest positive residuals, indicating that the satellite model systematically under-predicts COPD burden relative to registered prevalence. This is consistent with the industrial legacy of coal mining communities that persists in patient lung function decades after mine closure and represents a principled observational boundary of satellite-based modelling.
 
-**Figure 14: Valley trapping effect showing elevation vs NO2 and elevation vs COPD scatter plots with regression lines.**
+<div align="center">
 
-![Figure 14: Valley trapping](figures/s6_valley_trapping.png)
+![Figure 14](figures/s6_valley_trapping.png)
 
-**Figure 15: Wakefield anomaly confirmed in residual analysis. Actual vs environment-predicted COPD with Wakefield practices highlighted.**
+*Figure 14: Valley trapping effect showing elevation vs NO2 and elevation vs COPD scatter plots with regression lines.*
 
-![Figure 15: Wakefield anomaly](figures/s7_wakefield_anomaly.png)
+</div>
 
-**Figure 16: COVID-19 lockdown signal. NO2 reduction of 8.2 umol/m2 in 2020-21 captured across all four NHS areas without input from health records.**
+<div align="center">
 
-![Figure 16: COVID lockdown](figures/s5_covid_signal.png)
+![Figure 15](figures/s7_wakefield_anomaly.png)
+
+*Figure 15: Wakefield anomaly confirmed in residual analysis. Actual vs environment-predicted COPD with Wakefield practices highlighted.*
+
+</div>
+
+<div align="center">
+
+![Figure 16](figures/s5_covid_signal.png)
+
+*Figure 16: COVID-19 lockdown signal. NO2 reduction of 8.2 umol/m2 in 2020-21 captured across all four NHS areas without input from health records.*
+
+</div>
 
 ---
 
@@ -208,7 +292,11 @@ Leeds exhibits the highest composite environmental burden score of 0.613, driven
 
 Four actionable NHS outputs were derived from stacking ensemble predictions on the 2023-24 test year, each accompanied by LOO conformal uncertainty intervals.
 
+<div align="center">
+
 **Table 6: Clinical translation outputs and NHS applications.**
+
+</div>
 
 | Output | Finding | NHS Application |
 |--------|---------|----------------|
@@ -225,13 +313,21 @@ Four actionable NHS outputs were derived from stacking ensemble predictions on t
 
 **New practice risk calculator.** Expected COPD with LOO conformal intervals: Leeds 2.30% [1.26%, 3.34%], Wakefield 2.34% [1.30%, 3.38%], Bradford 1.94% [0.90%, 2.98%], Kirklees 1.84% [0.80%, 2.88%]. Area rankings match independently known COPD profiles, providing external face validity. These estimates could inform pre-registration spirometry equipment procurement, respiratory nurse staffing, and formulary planning for practices opening in high-burden environments.
 
-**Figure 17: Clinical translation outputs including under-diagnosis distribution, environmental inequality map, NO2 SHAP attribution by area, and new practice risk calculator.**
+<div align="center">
 
-![Figure 17: Clinical outputs](figures/track8_clinical.png)
+![Figure 17](figures/track8_clinical.png)
 
-**Figure 18: SHAP-based NO2 sensitivity analysis showing feature importance ranking, NO2 SHAP contribution by area, and NO2 value vs SHAP relationship.**
+*Figure 17: Clinical translation outputs including under-diagnosis distribution, environmental inequality map, NO2 SHAP attribution by area, and new practice risk calculator.*
 
-![Figure 18: NO2 SHAP](figures/track8_output3_shap_no2.png)
+</div>
+
+<div align="center">
+
+![Figure 18](figures/track8_output3_shap_no2.png)
+
+*Figure 18: SHAP-based NO2 sensitivity analysis showing feature importance ranking, NO2 SHAP contribution by area, and NO2 value vs SHAP relationship.*
+
+</div>
 
 ---
 
