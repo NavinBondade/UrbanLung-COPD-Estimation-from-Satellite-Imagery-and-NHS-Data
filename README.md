@@ -38,15 +38,15 @@ One-year temporal lags were computed for NO2, NDVI, EVI, PM2.5, and population d
 
 **Figure 1: Geographic distribution of COPD burden across 159 West Yorkshire GP practices (2023-24).**
 
-![Figure 1: Geographic map](figures/eda/s10_geographic_map.png)
+![Figure 1: Geographic map](figures/s10_geographic_map.png)
 
 **Figure 2: COPD prevalence distribution and year-on-year trend by NHS area (2019-2024).**
 
-![Figure 2: COPD distribution](figures/eda/s2_copd_distribution.png)
+![Figure 2: COPD distribution](figures/s2_copd_distribution.png)
 
 **Figure 3: Area-wise comparison of COPD, NO2, NDVI and elevation across four NHS commissioning areas.**
 
-![Figure 3: Area comparison](figures/eda/s4_area_comparison.png)
+![Figure 3: Area comparison](figures/s4_area_comparison.png)
 
 ---
 
@@ -116,7 +116,7 @@ LOOCV was applied differently across models depending on computational feasibili
 
 **Figure 11: Persistence baseline motivation showing within-practice versus between-practice COPD variance and practice trajectories across five years.**
 
-![Figure 11: Persistence baseline](figures/eda/s9_persistence_motivation.png)
+![Figure 11: Persistence baseline](figures/s9_persistence_motivation.png)
 
 ---
 
@@ -192,15 +192,15 @@ Leeds exhibits the highest composite environmental burden score of 0.613, driven
 
 **Figure 14: Valley trapping effect showing elevation vs NO2 and elevation vs COPD scatter plots with regression lines.**
 
-![Figure 14: Valley trapping](figures/eda/s6_valley_trapping.png)
+![Figure 14: Valley trapping](figures/s6_valley_trapping.png)
 
 **Figure 15: Wakefield anomaly confirmed in residual analysis. Actual vs environment-predicted COPD with Wakefield practices highlighted.**
 
-![Figure 15: Wakefield anomaly](figures/eda/s7_wakefield_anomaly.png)
+![Figure 15: Wakefield anomaly](figures/s7_wakefield_anomaly.png)
 
 **Figure 16: COVID-19 lockdown signal. NO2 reduction of 8.2 umol/m2 in 2020-21 captured across all four NHS areas without input from health records.**
 
-![Figure 16: COVID lockdown](figures/eda/s5_covid_signal.png)
+![Figure 16: COVID lockdown](figures/s5_covid_signal.png)
 
 ---
 
