@@ -494,10 +494,9 @@ UrbanLung: COPD Prevalence Estimation from Google Satellite Imagery and NHS Reco
 West Yorkshire NHS Practices, 2019-2024.
 Navin Bondade, University of Bradford, 2026.
 ```
-
 ## Author
 
-**Navin Bondade**
+Navin Bondade
 MSc Health Data Science, University College London
-LinkedIn: linkedin.com/in/navin-bondade
-GitHub: github.com/navinbondade
+
+[GitHub](https://github.com/NavinBondade) · [LinkedIn](https://linkedin.com/in/navin-bondade)
